@@ -1,12 +1,17 @@
 body {
   font-family: Arial, sans-serif;
-  background: #f5f5f5;
+  background-image: url('https://static01.nyt.com/images/2020/01/28/multimedia/28xp-memekid3/28cp-memekid3-superJumbo.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   padding: 20px;
   text-align: center;
+  color: #fff; /* Updated to white for better readability against a potential dark background image */
 }
 
 h1 {
-  color: #333;
+  color: #fff; /* Also updated to white */
 }
 
 #commentInput {
@@ -34,9 +39,10 @@ button {
 }
 
 .comment {
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.8); /* Added a slight transparency to the background of comments */
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 10px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  color: #333; /* Reverting comment text back to dark color */
 }
