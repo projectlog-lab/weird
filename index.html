@@ -6,15 +6,19 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <h1>weirdhat 🧢</h1>
-  <input type="text" id="commentInput" placeholder="Say anything anonymously...">
-  <button id="submitBtn">Post</button>
 
-  <div id="commentList"></div>
+  <!-- New "Share Your Shit" section -->
+  <div class="share-section">
+    <h3>Share Your Shit</h3>
+    <textarea id="postInput" placeholder="Write your story here..."></textarea>
+    <button id="postBtn">Post Story</button>
+  </div>
 
+  <div id="postsContainer">
+    <!-- Posts will be dynamically added here by script.js -->
+  </div>
+  
   <script type="module" src="script.js"></script>
-
 </body>
 </html>
-
