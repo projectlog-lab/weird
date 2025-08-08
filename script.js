@@ -1,115 +1,89 @@
-body {
-  font-family: Arial, sans-serif;
-  background-image: url('https://static01.nyt.com/images/2020/01/28/multimedia/28xp-memekid3/28cp-memekid3-superJumbo.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  padding: 20px;
-  text-align: center;
-  color: #fff;
-}
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
-h1 {
-  color: #fff;
-}
+// Your Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyA3VvkO0SXWMUZo_Fb66fmjY7sfiIe2h9A",
+  authDomain: "hate-c0efd.firebaseapp.com",
+  databaseURL: "https://hate-c0efd-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "hate-c0efd",
+  storageBucket: "hate-c0efd.firebasestorage.app",
+  messagingSenderId: "817423625776",
+  appId: "1:817423625776:web:a4e4b00b99d549522107f5"
+};
 
-.share-section {
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: left;
-  color: #333;
-}
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
-.share-section h3 {
-  color: #333;
-  text-align: center;
-}
+// References to the main posts and the comment lists
+const postsRef = ref(database, "posts");
+const postsContainer = document.getElementById("postsContainer");
 
-#postInput {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  height: 100px;
-  box-sizing: border-box; /* Ensures padding doesn't affect width */
-  margin-bottom: 10px;
-}
+// Get the elements for creating a new post
+const postInput = document.getElementById("postInput");
+const postBtn = document.getElementById("postBtn");
 
-#postBtn {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  background-color: #111;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
+// Event listener for creating a new post
+postBtn.addEventListener("click", () => {
+  const postContent = postInput.value.trim();
+  if (postContent === "") return;
 
-#postsContainer {
-  margin-top: 30px;
-}
+  // Push the new post to the database
+  push(postsRef, {
+    content: postContent,
+    timestamp: new Date().toISOString()
+  });
 
-.post {
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: left;
-  color: #333;
-}
+  postInput.value = "";
+});
 
-.comment-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-}
+// Listener to display new posts and their comment sections
+onChildAdded(postsRef, (postSnapshot) => {
+  const postKey = postSnapshot.key;
+  const postData = postSnapshot.val();
 
-.comment-section h4 {
-  margin-top: 0;
-}
+  // Create the HTML for the new post
+  const postElement = document.createElement("div");
+  postElement.className = "post";
+  postElement.setAttribute("data-post-id", postKey);
+  postElement.innerHTML = `
+    <p>${postData.content}</p>
+    <div class="comment-section">
+      <h4>Comments</h4>
+      <input type="text" class="commentInput" placeholder="Say anything anonymously...">
+      <button class="submitBtn">Post</button>
+      <div class="commentList"></div>
+    </div>
+  `;
 
-.commentInput {
-  width: calc(100% - 100px);
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
+  // Prepend the new post to the top of the container
+  postsContainer.prepend(postElement);
 
-.submitBtn {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #111;
-  color: white;
-  border: none;
-  cursor: pointer;
-  margin-left: 10px;
-  border-radius: 5px;
-}
+  // Set up the comment section for this specific post
+  const commentInput = postElement.querySelector(".commentInput");
+  const submitBtn = postElement.querySelector(".submitBtn");
+  const commentList = postElement.querySelector(".commentList");
 
-.commentList {
-  margin-top: 15px;
-  text-align: left;
-}
+  const commentsRef = ref(database, `posts/${postKey}/comments`);
 
-.comment {
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  color: #333;
-}
+  // Event listener for posting a comment on this specific post
+  submitBtn.addEventListener("click", () => {
+    const commentContent = commentInput.value.trim();
+    if (commentContent === "") return;
+    push(commentsRef, {
+      text: commentContent,
+      timestamp: new Date().toISOString()
+    });
+    commentInput.value = "";
+  });
 
+  // Listener to display comments for this specific post
+  onChildAdded(commentsRef, (commentSnapshot) => {
+    const commentData = commentSnapshot.val();
+    const commentElement = document.createElement("div");
+    commentElement.className = "comment";
+    commentElement.innerText = commentData.text;
+    commentList.appendChild(commentElement);
+  });
+});
